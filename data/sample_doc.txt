@@ -1,0 +1,217 @@
+INTELIGENCIA ARTIFICIAL — GUÍA DE TECNOLOGÍAS Y CONCEPTOS CLAVE
+
+Esta guía cubre las principales tecnologías, frameworks y conceptos del ecosistema de Inteligencia Artificial moderna.
+
+═══════════════════════════════════════════════
+MODELOS DE LENGUAJE GRANDE (LLMs)
+═══════════════════════════════════════════════
+
+Los LLMs (Large Language Models) son modelos de IA entrenados sobre enormes corpus de texto que son capaces de generar, comprender y razonar con lenguaje natural.
+
+Principales modelos disponibles:
+- GPT-4o y GPT-4 Turbo (OpenAI): Los más populares en producción
+- Gemini 2.5 Pro y Gemini Flash (Google DeepMind): Multimodales de última generación
+- Claude 3.5 Sonnet y Claude 3 Opus (Anthropic): Destacan en razonamiento y seguridad
+- LLaMA 3 (Meta): Open-source, ejecutable localmente
+- Mistral y Mixtral (Mistral AI): Open-source europeo, muy eficiente
+- DeepSeek R1 (DeepSeek): Especializado en razonamiento matemático y código
+
+Parámetros clave:
+- Temperatura: Controla la creatividad (0=determinista, 1=muy creativo)
+- Top-p / Top-k: Controla la diversidad de tokens seleccionados
+- Context window: Número máximo de tokens que el modelo puede procesar a la vez
+- Max tokens: Límite de tokens en la respuesta generada
+
+═══════════════════════════════════════════════
+RETRIEVAL-AUGMENTED GENERATION (RAG)
+═══════════════════════════════════════════════
+
+RAG es una arquitectura que combina la recuperación de información con la generación de texto para producir respuestas fundamentadas en datos reales.
+
+Componentes de un sistema RAG:
+1. Document Loader: Carga documentos (PDF, TXT, HTML, DOCX...)
+2. Text Splitter: Divide el texto en chunks manejables
+3. Embedding Model: Convierte texto en vectores numéricos
+4. Vector Store: Base de datos que almacena y busca vectores por similitud
+5. Retriever: Busca los k chunks más relevantes para una consulta
+6. LLM: Genera la respuesta usando el contexto recuperado
+
+Ventajas de RAG:
+- Elimina alucinaciones al anclar respuestas en datos reales
+- Permite actualizar el conocimiento sin re-entrenar el modelo
+- Transparencia: se puede mostrar las fuentes utilizadas
+- Coste eficiente vs fine-tuning
+
+Herramientas más usadas:
+- LangChain: Framework de orquestación de LLMs más popular
+- LlamaIndex: Alternativa a LangChain, especialmente para RAG
+- ChromaDB: Base de datos vectorial en memoria, open-source
+- Pinecone: Base de datos vectorial cloud, altamente escalable
+- FAISS (Meta): Librería de búsqueda de similitud extremadamente rápida
+- Weaviate: Vector store open-source con capacidades de búsqueda híbrida
+
+═══════════════════════════════════════════════
+EMBEDDINGS Y BÚSQUEDA SEMÁNTICA
+═══════════════════════════════════════════════
+
+Los embeddings son representaciones vectoriales del texto que capturan el significado semántico. Textos similares tienen vectores cercanos en el espacio de alta dimensión.
+
+Modelos de embeddings populares:
+- all-MiniLM-L6-v2 (HuggingFace): Rápido, ligero, 384 dimensiones, ideal para demos
+- text-embedding-ada-002 (OpenAI): Muy bueno, 1536 dimensiones, por API
+- text-embedding-3-small / large (OpenAI): La generación más reciente de OpenAI
+- all-mpnet-base-v2: Mejor calidad que MiniLM, 768 dimensiones
+- multilingual-e5-large: Soporte multiidioma, ideal para español
+
+Métricas de similitud:
+- Similitud coseno: La más usada, insensible a la magnitud del vector
+- Producto punto: Más rápida pero sensible a la longitud
+- Distancia euclidiana: Intuitiva pero menos efectiva para texto
+
+═══════════════════════════════════════════════
+IA MULTIMODAL Y VISIÓN POR COMPUTADOR
+═══════════════════════════════════════════════
+
+Los modelos multimodales procesan múltiples tipos de datos: texto, imágenes, audio y vídeo.
+
+Modelos de visión destacados:
+- Gemini Vision (Google): Analiza imágenes, documentos y vídeos
+- GPT-4V / GPT-4o (OpenAI): Comprensión de imágenes en conversación
+- Claude Vision (Anthropic): Análisis detallado de imágenes
+- LLaVA: Modelo open-source de visión y lenguaje
+
+Casos de uso en visión:
+- OCR inteligente: Extraer texto de imágenes y documentos
+- Análisis de productos: Describir artículos a partir de fotos
+- Moderación de contenido: Detectar imágenes inapropiadas
+- Diagnóstico médico: Análisis de imágenes radiológicas
+- Automatización industrial: Control de calidad visual
+
+Herramientas de procesamiento:
+- OpenCV: Biblioteca de visión por computador más popular en Python
+- Pillow (PIL): Manipulación de imágenes en Python
+- torchvision: Extensión de PyTorch para visión
+- Detectron2 (Meta): Detección y segmentación de objetos
+
+═══════════════════════════════════════════════
+PROCESAMIENTO DE LENGUAJE NATURAL (NLP)
+═══════════════════════════════════════════════
+
+El NLP abarca el conjunto de técnicas para que los ordenadores entiendan y generen lenguaje humano.
+
+Tareas principales de NLP:
+- Análisis de sentimientos: Determinar la polaridad emocional de un texto
+- Clasificación de texto: Categorizar documentos por tema o intención
+- Reconocimiento de Entidades (NER): Detectar personas, lugares, organizaciones
+- Traducción automática: Convertir texto entre idiomas
+- Resumen automático: Generar versiones cortas de textos largos
+- Extracción de información: Identificar datos estructurados en texto libre
+- Question Answering (QA): Responder preguntas basadas en un contexto
+
+Frameworks y librerías NLP:
+- HuggingFace Transformers: El hub de modelos NLP más grande del mundo
+- spaCy: Pipeline de NLP industrial, muy rápido
+- NLTK: Herramientas clásicas de NLP para investigación
+- Stanza (Stanford): NLP multilingüe de alta precisión
+- Flair: Framework NLP basado en embeddings contextuales
+
+═══════════════════════════════════════════════
+ARQUITECTURAS DE MODELOS
+═══════════════════════════════════════════════
+
+Transformer (2017, Google):
+- Base de todos los LLMs modernos
+- Mecanismo de atención (self-attention) para capturar dependencias largas
+- Componentes: Encoder, Decoder, Multi-head Attention, Feed-Forward Network
+
+BERT (Google, 2018):
+- Bidireccional: lee el texto en ambas direcciones
+- Pre-entrenado con Masked Language Modeling y Next Sentence Prediction
+- Ideal para: clasificación, NER, question answering
+
+GPT (OpenAI, 2018-2024):
+- Autoregresivo: genera texto token a token de izquierda a derecha
+- Pre-entrenado para predecir el siguiente token
+- Ideal para: generación de texto, chatbots, código
+
+T5 (Google, 2019):
+- Arquitectura encoder-decoder
+- Trata todas las tareas NLP como text-to-text
+- Ideal para: traducción, resumen, QA
+
+Mixtral / MoE (Mixture of Experts):
+- Activa solo una fracción de los parámetros por token
+- Muy eficiente en inferencia
+- Permite modelos enormes con bajo coste computacional
+
+═══════════════════════════════════════════════
+HERRAMIENTAS Y PLATAFORMAS
+═══════════════════════════════════════════════
+
+Frameworks de Deep Learning:
+- PyTorch: El más popular en investigación, flexible y Pythónico
+- TensorFlow / Keras: Muy usado en producción, especialmente en Google
+- JAX (Google): Para investigación de vanguardia, muy eficiente en TPUs
+
+Plataformas de modelos:
+- HuggingFace Hub: Miles de modelos open-source descargables
+- Ollama: Ejecutar LLMs localmente de forma sencilla
+- LM Studio: GUI para ejecutar modelos localmente
+- Replicate: API para modelos de IA en la nube
+- Together AI: Inferencia rápida de modelos open-source
+
+MLOps y productivización:
+- Weights & Biases (W&B): Tracking de experimentos y visualización
+- MLflow: Gestión del ciclo de vida de modelos ML
+- DVC: Control de versiones de datos y modelos
+- Docker + Kubernetes: Containerización y orquestación
+- FastAPI: Framework Python para construir APIs de IA
+- Gradio / Streamlit: Prototipado rápido de demos de IA
+
+Plataformas de despliegue:
+- HuggingFace Spaces: Despliegue gratuito de demos
+- Railway / Render: Deploy de aplicaciones con FastAPI
+- Google Cloud Vertex AI: Producción enterprise con Google
+- AWS SageMaker: Producción enterprise con Amazon
+- Azure OpenAI Service: Acceso enterprise a modelos OpenAI
+
+═══════════════════════════════════════════════
+PROMPT ENGINEERING
+═══════════════════════════════════════════════
+
+El Prompt Engineering es la disciplina de diseñar entradas para LLMs que produzcan outputs óptimos.
+
+Técnicas principales:
+- Zero-shot: Dar una instrucción sin ejemplos
+- Few-shot: Incluir 2-5 ejemplos de input/output esperado
+- Chain-of-Thought (CoT): Pedir al modelo que "piense paso a paso"
+- ReAct: Combinar razonamiento y acción (para agentes)
+- Self-consistency: Generar múltiples respuestas y votar la mayoría
+- Tree of Thoughts: Explorar múltiples caminos de razonamiento
+- RAG prompting: Inyectar contexto relevante en el prompt
+
+Mejores prácticas:
+- Ser específico y claro en las instrucciones
+- Definir el formato de salida esperado (JSON, lista, tabla...)
+- Asignar un rol específico al modelo en el system prompt
+- Usar delimitadores para separar partes del prompt
+- Iterar y medir el impacto de cada cambio
+
+═══════════════════════════════════════════════
+AGENTES DE IA
+═══════════════════════════════════════════════
+
+Los agentes de IA son sistemas que usan LLMs para razonar y ejecutar acciones de forma autónoma.
+
+Componentes de un agente:
+- LLM: El "cerebro" que planifica y decide
+- Tools/Herramientas: Funciones que el agente puede llamar (búsqueda web, código, APIs)
+- Memory: Historial de acciones y observaciones
+- Planner: Estrategia para descomponer tareas complejas
+
+Frameworks de agentes:
+- LangChain Agents: El más popular, muy extensible
+- LangGraph: Para agentes con estado y flujos complejos
+- AutoGen (Microsoft): Agentes multi-turn conversacionales
+- CrewAI: Orquestación de múltiples agentes con roles
+- OpenAI Assistants API: Agentes con tools integradas
