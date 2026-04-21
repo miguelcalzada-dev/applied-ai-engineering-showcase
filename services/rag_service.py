@@ -11,28 +11,34 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain_core.documents import Document
 
 # Importar Chroma y embeddings desde langchain_community
+# Importar Chroma y embeddings de Google
 try:
-    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from langchain_google_genai import GoogleGenerativeAIEmbeddings
     from langchain_community.vectorstores import Chroma
 except ImportError:
-    # Fallback para versiones antiguas de langchain
-    from langchain.embeddings import HuggingFaceEmbeddings  # type: ignore
-    from langchain.vectorstores import Chroma  # type: ignore
+    # Fallback o mensaje de error si no está instalado
+    raise ImportError("Asegúrate de instalar langchain-google-genai para usar embeddings de Google.")
 
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_MODEL = "models/text-embedding-004"
 
 # Almacén en memoria: session_id → vectordb
 _stores: dict = {}
 
 # Singleton del modelo de embeddings (tarda en cargar)
-_embeddings: Optional[HuggingFaceEmbeddings] = None
+_embeddings: Optional[GoogleGenerativeAIEmbeddings] = None
 
 
-def _get_embeddings() -> HuggingFaceEmbeddings:
+def _get_embeddings() -> GoogleGenerativeAIEmbeddings:
     """Retorna el modelo de embeddings (lo carga solo la primera vez)."""
     global _embeddings
     if _embeddings is None:
-        _embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY no encontrada en las variables de entorno.")
+        _embeddings = GoogleGenerativeAIEmbeddings(
+            model=EMBEDDING_MODEL,
+            google_api_key=api_key
+        )
     return _embeddings
 
 

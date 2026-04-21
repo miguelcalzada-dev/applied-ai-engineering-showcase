@@ -1,4 +1,10 @@
 import os
+import sys
+
+# Logs de diagnóstico para Render
+print(">>> [STARTUP] Iniciando Applied AI Engineering Showcase...", file=sys.stderr)
+sys.stderr.flush()
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -6,6 +12,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 load_dotenv()
+print(f">>> [STARTUP] Python versión: {sys.version}", file=sys.stderr)
+print(f">>> [STARTUP] Directorio actual: {os.getcwd()}", file=sys.stderr)
+sys.stderr.flush()
 
 from routers import chat, vision, rag, nlp, prompt_lab
 
