@@ -482,8 +482,10 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
   transition: all var(--transition);
 }
 .drop-zone:hover { background: var(--accent); color: white; border-style: solid; box-shadow: var(--shadow-hover); }
-.camera-container { border: 4px solid var(--border); background: black; position: relative; }
-.image-preview { border: 4px solid var(--border); min-height: 200px; background: var(--surface); display: flex; justify-content: center; align-items: center; box-shadow: var(--shadow); position: relative; }
+.camera-container { border: 4px solid var(--border); background: black; position: relative; min-height: 200px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+.camera-video { width: 100%; max-height: 350px; object-fit: cover; }
+.camera-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; font-family: var(--font-mono); gap: 10px; text-align: center; }
+.image-preview { border: 4px solid var(--border); min-height: 200px; height: 100%; max-height: 358px; background: var(--surface); display: flex; justify-content: center; align-items: center; box-shadow: var(--shadow); position: relative; overflow: hidden; }
 .image-preview img { width: 100%; max-height: 350px; object-fit: contain; }
 .vision-result { border: 2px solid var(--border); padding: 20px; font-family: var(--font-mono); background: var(--card); box-shadow: var(--shadow); white-space: pre-wrap; font-size: 0.95rem; }
 
