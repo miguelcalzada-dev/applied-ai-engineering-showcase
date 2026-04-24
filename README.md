@@ -6,12 +6,19 @@ El proyecto consolida los casos de uso más demandados en la industria de la IA 
 
 ---
 
+## 🌐 Demo en Vivo
+
+La aplicación se encuentra desplegada y funcionando en producción a través de Railway:
+👉 **[https://web-production-2ec10.up.railway.app/](https://web-production-2ec10.up.railway.app/)**
+
+---
+
 ## 🌟 Características y Módulos
 
 1. **💬 Chat Multi-turno (LLM Core)**
    - Conversaciones con memoria de contexto persistente.
    - Parámetros ajustables: *System Prompt* y *Temperatura*.
-   - Entrada de voz nativa del navegador (Web Speech API).
+   - Transcripción y envío de voz (MediaRecorder API).
 
 2. **👁️ Análisis de Imágenes (Vision)**
    - Subida de imágenes vía "Drag & Drop".
@@ -33,8 +40,8 @@ El proyecto consolida los casos de uso más demandados en la industria de la IA 
    - **Clasificador de intención**: categorización temática, detección de formato (pregunta/información) e idioma.
 
 6. **🎙️ Asistente de Voz (Speech-to-Text & Text-to-Speech)**
-   - Una interfaz 100% "Manos libres" que interactúa con el micrófono y responde por los altavoces de tu ordenador.
-   - Sin dependencias pesadas del sistema local (empleamos la Web Speech + SpeechSynthesis API).
+   - Una interfaz "Manos libres" que graba tu voz y responde hablando.
+   - Utiliza la API de MediaRecorder junto a las capacidades de audio nativo de Gemini para lograr máxima compatibilidad en móviles y escritorio.
 
 ---
 

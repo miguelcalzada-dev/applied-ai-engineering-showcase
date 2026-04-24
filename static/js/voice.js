@@ -1,7 +1,8 @@
-/* voice.js — Asistente de Voz (Web Speech API + Gemini) */
+/* voice.js — Asistente de Voz (MediaRecorder + Gemini Audio) */
 
 let voiceSessionId  = null;
-let recognition     = null;
+let mediaRecorder   = null;
+let audioChunks     = [];
 let isListening     = false;
 let isSpeaking      = false;
 
@@ -13,61 +14,21 @@ function initVoice() {
 
   if (!micBtn) return;
 
-  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRec) {
-    document.getElementById('voice-not-supported')?.classList.remove('hidden');
-    micBtn.disabled = true;
-    return;
-  }
-
-  recognition = new SpeechRec();
-  recognition.interimResults = true;
-  recognition.continuous     = false;
-
-  recognition.onstart = () => {
-    isListening = true;
-    micBtn.classList.add('listening');
-    micBtn.querySelector('.mic-rings')?.classList.add('listening');// rings on parent
-    setVoiceStatus('listening', '🎙️ Escuchando…');
-    if (stopBtn) stopBtn.disabled = false;
-  };
-
-  recognition.onresult = e => {
-    let interim = '', final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
-    }
-    const transcriptEl = document.getElementById('voice-transcript');
-    if (transcriptEl) {
-      transcriptEl.textContent = final || interim;
-      transcriptEl.classList.toggle('has-text', !!(final || interim));
-    }
-    if (final) onFinalTranscript(final);
-  };
-
-  recognition.onerror = e => {
-    setVoiceStatus('', `❌ Error: ${e.error}`);
-    stopListening();
-    showToast('Error de reconocimiento: ' + e.error, 'error');
-  };
-
-  recognition.onend = () => {
-    isListening = false;
-    micBtn.classList.remove('listening');
-    setWrapListeningClass(false);
-    if (stopBtn) stopBtn.disabled = true;
-  };
-
   micBtn.addEventListener('click', toggleListening);
   stopBtn?.addEventListener('click', stopListening);
   clearBtn?.addEventListener('click', clearVoice);
-  langSel?.addEventListener('change', () => {
-    if (recognition) recognition.lang = langSel.value;
-  });
-
-  // Set initial language
-  if (langSel) recognition.lang = langSel.value;
+  
+  // Verificamos soporte de micrófono
+  const notSupported = document.getElementById('voice-not-supported');
+  if (notSupported) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          notSupported.classList.remove('hidden');
+          notSupported.innerHTML = '<p>⚠️ Tu navegador no soporta el acceso al micrófono. Requiere HTTPS o localhost.</p>';
+          micBtn.disabled = true;
+      } else {
+          notSupported.classList.add('hidden');
+      }
+  }
 }
 
 function setWrapListeningClass(on) {
@@ -75,63 +36,121 @@ function setWrapListeningClass(on) {
   if (wrap) wrap.classList.toggle('listening', on);
 }
 
-function toggleListening() {
+async function toggleListening() {
   if (isListening) stopListening();
-  else startListening();
+  else await startListening();
 }
 
-function startListening() {
-  if (!recognition || isListening || isSpeaking) return;
-  const langSel = document.getElementById('voice-lang');
-  if (langSel) recognition.lang = langSel.value;
+async function startListening() {
+  if (isListening || isSpeaking) return;
 
   const transcriptEl = document.getElementById('voice-transcript');
-  if (transcriptEl) { transcriptEl.textContent = ''; transcriptEl.classList.remove('has-text'); }
+  if (transcriptEl) { transcriptEl.textContent = '🎙️ Grabando... (Pulsa de nuevo para enviar)'; transcriptEl.classList.add('has-text'); }
+  const responseEl = document.getElementById('voice-response');
+  if (responseEl) { responseEl.textContent = ''; responseEl.classList.remove('has-text'); }
 
-  try { recognition.start(); setWrapListeningClass(true); }
-  catch (e) { showToast('No se pudo iniciar el micrófono', 'error'); }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstart = () => {
+      isListening = true;
+      const micBtn = document.getElementById('voice-mic-btn');
+      if (micBtn) {
+          micBtn.classList.add('listening');
+          micBtn.querySelector('.mic-rings')?.classList.add('listening');
+      }
+      setWrapListeningClass(true);
+      setVoiceStatus('listening', '🎙️ Grabando… (Pulsa para detener y enviar)');
+      const stopBtn = document.getElementById('voice-stop-btn');
+      if (stopBtn) stopBtn.disabled = false;
+    };
+
+    mediaRecorder.onstop = async () => {
+      isListening = false;
+      const micBtn = document.getElementById('voice-mic-btn');
+      if (micBtn) {
+          micBtn.classList.remove('listening');
+          micBtn.querySelector('.mic-rings')?.classList.remove('listening');
+      }
+      setWrapListeningClass(false);
+      const stopBtn = document.getElementById('voice-stop-btn');
+      if (stopBtn) stopBtn.disabled = true;
+
+      // Detener micrófono
+      stream.getTracks().forEach(track => track.stop());
+
+      // Enviar audio al backend
+      const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+      await sendAudioToBackend(audioBlob);
+    };
+
+    mediaRecorder.start();
+  } catch (err) {
+    console.error(err);
+    showToast('No se pudo acceder al micrófono. Verifica permisos o usa HTTPS.', 'error');
+    setVoiceStatus('', '❌ Error de micrófono');
+  }
 }
 
 function stopListening() {
-  if (recognition && isListening) recognition.stop();
-  isListening = false;
-  document.getElementById('voice-mic-btn')?.classList.remove('listening');
-  setWrapListeningClass(false);
-  setVoiceStatus('', '🎙️ Pulsa el micrófono para hablar');
+  if (mediaRecorder && isListening) {
+    mediaRecorder.stop();
+  }
 }
 
-async function onFinalTranscript(text) {
-  setVoiceStatus('processing', '⚙️ Procesando respuesta…');
+async function sendAudioToBackend(audioBlob) {
+  setVoiceStatus('processing', '⚙️ Procesando audio con Gemini...');
+  const transcriptEl = document.getElementById('voice-transcript');
+  if (transcriptEl) { transcriptEl.textContent = '...'; transcriptEl.classList.add('has-text'); }
   const responseEl = document.getElementById('voice-response');
-  if (responseEl) { responseEl.textContent = '…'; responseEl.classList.remove('has-text'); }
+  if (responseEl) { responseEl.textContent = '...'; responseEl.classList.remove('has-text'); }
 
   try {
-    const data = await apiFetch('/api/chat', {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'voice.webm');
+    if (voiceSessionId) formData.append('session_id', voiceSessionId);
+    
+    // Configuración para que el asistente sea conciso
+    formData.append('system_prompt', 'Responde de forma breve, natural y conversacional. Máximo 3 frases.');
+    formData.append('temperature', '0.75');
+
+    const res = await fetch('/api/chat/voice', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        session_id: voiceSessionId,
-        message: text,
-        system_prompt: 'Responde de forma breve, natural y conversacional. Máximo 3 frases.',
-        temperature: 0.75,
-      }),
+      body: formData
     });
+
+    if (!res.ok) {
+        throw new Error('Error al enviar audio al servidor. ¿Problema de red o servidor caído?');
+    }
+
+    const data = await res.json();
     voiceSessionId = data.session_id;
 
+    if (transcriptEl) {
+        transcriptEl.textContent = data.transcript || '(Ininteligible)';
+    }
+
     if (responseEl) {
-      responseEl.textContent = data.response;
+      responseEl.textContent = data.response || '(Sin respuesta)';
       responseEl.classList.add('has-text');
     }
 
     speakResponse(data.response);
   } catch (err) {
-    setVoiceStatus('', '❌ Error al obtener respuesta');
+    setVoiceStatus('', '❌ Error al procesar audio');
     showToast(err.message, 'error');
+    if (transcriptEl) transcriptEl.textContent = 'Error de comunicación.';
   }
 }
 
 function speakResponse(text) {
-  if (!window.speechSynthesis) return;
+  if (!window.speechSynthesis || !text) return;
 
   const langSel = document.getElementById('voice-lang');
   const lang    = langSel ? langSel.value : 'es-ES';
@@ -145,7 +164,6 @@ function speakResponse(text) {
   utterance.rate  = 1.0;
   utterance.pitch = 1.0;
 
-  // Prefer a natural voice
   const voices = window.speechSynthesis.getVoices();
   const preferred = voices.find(v => v.lang.startsWith(lang.split('-')[0]) && !v.name.includes('Google'))
     || voices.find(v => v.lang.startsWith(lang.split('-')[0]));

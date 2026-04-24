@@ -3,11 +3,10 @@ chat.py — Router de Chat multi-turno con Gemini.
 Mantiene historial de sesión en memoria del servidor.
 """
 import uuid
-from fastapi import APIRouter
+from services.gemini_service import chat_response, voice_response
+from fastapi import APIRouter, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import Optional
-
-from services.gemini_service import chat_response
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
 
@@ -53,6 +52,46 @@ async def chat(req: ChatRequest):
     history.append({"role": "model", "content": response_text})
 
     return {"session_id": session_id, "response": response_text}
+
+
+@router.post("/voice")
+async def chat_voice(
+    audio: UploadFile = File(...),
+    session_id: Optional[str] = Form(None),
+    system_prompt: Optional[str] = Form(""),
+    temperature: float = Form(0.7)
+):
+    """
+    Recibe un mensaje de voz, lo transcribe y responde usando Gemini Audio.
+    El historial se mantiene igual que en el chat de texto.
+    """
+    sess_id = session_id or str(uuid.uuid4())
+    
+    if sess_id not in _sessions:
+        _sessions[sess_id] = []
+        
+    history = _sessions[sess_id]
+    
+    audio_bytes = await audio.read()
+    
+    # Enviar a Gemini para transcripción y respuesta
+    transcript, response_text = voice_response(
+        history=history,
+        audio_bytes=audio_bytes,
+        mime_type=audio.content_type,
+        system_prompt=system_prompt or "",
+        temperature=temperature
+    )
+    
+    # Añadir al historial de la sesión
+    history.append({"role": "user", "content": transcript})
+    history.append({"role": "model", "content": response_text})
+    
+    return {
+        "session_id": sess_id,
+        "transcript": transcript,
+        "response": response_text
+    }
 
 
 @router.delete("/{session_id}")

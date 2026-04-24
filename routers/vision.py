@@ -41,7 +41,7 @@ async def vision_analyze(
             detail=f"Imagen demasiado grande ({size_mb:.1f} MB). Máximo {MAX_SIZE_MB} MB.",
         )
 
-    result = analyze_image(image_bytes=image_bytes, question=question)
+    result = analyze_image(image_bytes=image_bytes, question=question, mime_type=content_type)
     return {
         "result": result,
         "filename": image.filename,
