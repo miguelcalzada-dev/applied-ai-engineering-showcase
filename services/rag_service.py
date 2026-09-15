@@ -19,7 +19,7 @@ except ImportError:
     # Fallback o mensaje de error si no está instalado
     raise ImportError("Asegúrate de instalar langchain-google-genai para usar embeddings de Google.")
 
-EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "models/text-embedding-004")
+EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "models/gemini-embedding-001")
 
 # Almacén en memoria: session_id → vectordb
 _stores: dict = {}
