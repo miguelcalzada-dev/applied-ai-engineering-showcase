@@ -61,7 +61,14 @@ async def use_demo():
     Carga el documento de demo (Guía de IA) y devuelve su session_id.
     Útil para probar el RAG sin necesidad de subir un archivo.
     """
-    session_id = get_demo_session()
+    try:
+        session_id = get_demo_session()
+    except Exception as e:
+        import traceback
+        raise HTTPException(
+            status_code=500,
+            detail=f"{type(e).__name__}: {e}\n{traceback.format_exc()[-1500:]}",
+        )
     return {
         "session_id": session_id,
         "message": "Documento de demo cargado: 'Guía de Tecnologías de IA'",
