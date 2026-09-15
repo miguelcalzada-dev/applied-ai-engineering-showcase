@@ -5,9 +5,9 @@ import sys
 print(">>> [STARTUP] Iniciando Applied AI Engineering Showcase...", file=sys.stderr)
 sys.stderr.flush()
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
@@ -48,6 +48,18 @@ app.include_router(prompt_lab.router)
 
 # Archivos estáticos (frontend)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.middleware("http")
+async def redirect_legacy_root(request: Request, call_next):
+    """
+    La raíz de la URL antigua (Railway) redirige al dominio nuevo.
+    Se usa raw_path (no reescrito) para NO afectar a las peticiones que llegan
+    desde el portal a /ai-lab/... y evitar bucles de redirección.
+    """
+    if request.scope.get("raw_path") in (b"/", b""):
+        return RedirectResponse("https://miguelcalzada.com/ai-lab", status_code=308)
+    return await call_next(request)
 
 
 @app.get("/", include_in_schema=False)
