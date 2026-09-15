@@ -19,7 +19,7 @@ sys.stderr.flush()
 from routers import chat, vision, rag, nlp, prompt_lab
 
 app = FastAPI(
-    title="AI Portfolio Demo",
+    title="AI Lab",
     description=(
         "Demo interactiva de capacidades de IA: Chat multi-turno, Visión por Computador, "
         "RAG con documentos propios, Laboratorio de Prompts, Herramientas NLP y Asistente de Voz."
