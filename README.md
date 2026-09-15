@@ -60,7 +60,7 @@ Asegúrate de tener Python 3.9 o superior instalado.
 
 1. **Clonar este repositorio o acceder a la carpeta**:
    ```bash
-   cd ai-portfolio-demo
+   cd applied-ai-engineering-showcase
    ```
 
 2. **Crear y activar un Entorno Virtual** *(recomendado)*:
