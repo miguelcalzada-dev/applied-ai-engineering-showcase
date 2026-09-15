@@ -120,7 +120,7 @@ async function sendAudioToBackend(audioBlob) {
     formData.append('system_prompt', 'Responde de forma breve, natural y conversacional. Máximo 3 frases.');
     formData.append('temperature', '0.75');
 
-    const res = await fetch('/api/chat/voice', {
+    const res = await fetch('api/chat/voice', {
       method: 'POST',
       body: formData
     });

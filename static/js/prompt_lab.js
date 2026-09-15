@@ -48,7 +48,7 @@ async function runPromptLab() {
 
   const start = Date.now();
   try {
-    const data = await apiFetch('/api/prompt-lab', {
+    const data = await apiFetch('api/prompt-lab', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

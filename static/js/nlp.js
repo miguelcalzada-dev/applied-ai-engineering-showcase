@@ -19,7 +19,7 @@ async function analyzeSentiment() {
   result.innerHTML = '<div class="skeleton" style="height:90px"></div>';
 
   try {
-    const data = await apiFetch('/api/nlp/sentiment', {
+    const data = await apiFetch('api/nlp/sentiment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
@@ -78,7 +78,7 @@ async function summarizeText() {
   result.innerHTML = '<div class="skeleton" style="height:80px"></div>';
 
   try {
-    const data = await apiFetch('/api/nlp/summarize', {
+    const data = await apiFetch('api/nlp/summarize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, max_words: parseInt(wordsEl?.value || '80') }),
@@ -107,7 +107,7 @@ async function classifyText() {
   result.innerHTML = '<div class="skeleton" style="height:120px"></div>';
 
   try {
-    const data = await apiFetch('/api/nlp/classify', {
+    const data = await apiFetch('api/nlp/classify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),

@@ -89,7 +89,7 @@ async function sendChatMessage() {
   const loadingBubble = appendLoadingBubble();
 
   try {
-    const data = await apiFetch('/api/chat', {
+    const data = await apiFetch('api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -153,7 +153,7 @@ function appendLoadingBubble() {
 
 async function clearChat() {
   if (chatSessionId) {
-    try { await apiFetch(`/api/chat/${chatSessionId}`, { method: 'DELETE' }); } catch (_) {}
+    try { await apiFetch(`api/chat/${chatSessionId}`, { method: 'DELETE' }); } catch (_) {}
     chatSessionId = null;
   }
   const messages = document.getElementById('chat-messages');

@@ -36,7 +36,7 @@ async function uploadDocument(file) {
   formData.append('file', file);
 
   try {
-    const data = await apiFetch('/api/rag/upload', { method: 'POST', body: formData });
+    const data = await apiFetch('api/rag/upload', { method: 'POST', body: formData });
     ragSessionId = data.session_id;
     setRagStatus('ready', `✅ "${file.name}" indexado (${data.words.toLocaleString()} palabras)`);
     document.getElementById('rag-send').disabled = false;
@@ -60,7 +60,7 @@ async function loadDemoDocument() {
   setRagStatus('loading', '⏳ Cargando documento de demo…');
 
   try {
-    const data = await apiFetch('/api/rag/demo');
+    const data = await apiFetch('api/rag/demo');
     ragSessionId = data.session_id;
     setRagStatus('ready', '✅ Demo: Guía de Tecnologías de IA cargada');
     document.getElementById('rag-send').disabled  = false;
@@ -93,7 +93,7 @@ async function sendRagMessage() {
 
   const loader = appendRagLoader();
   try {
-    const data = await apiFetch('/api/rag/query', {
+    const data = await apiFetch('api/rag/query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session_id: ragSessionId, question: text }),

@@ -25,6 +25,7 @@ app = FastAPI(
         "RAG con documentos propios, Laboratorio de Prompts, Herramientas NLP y Asistente de Voz."
     ),
     version="1.0.0",
+    root_path="/ai-lab",
     docs_url="/docs",
     redoc_url="/redoc",
 )

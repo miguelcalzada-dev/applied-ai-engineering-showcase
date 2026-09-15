@@ -126,7 +126,7 @@ async function analyzeImage() {
   formData.append('question', question);
 
   try {
-    const data = await apiFetch('/api/vision', { method: 'POST', body: formData });
+    const data = await apiFetch('api/vision', { method: 'POST', body: formData });
     resultEl.textContent = data.result;
     resultEl.classList.add('has-content');
   } catch (err) {
