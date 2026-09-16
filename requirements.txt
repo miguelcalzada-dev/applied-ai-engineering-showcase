@@ -5,7 +5,7 @@ gunicorn>=21.2.0
 python-multipart>=0.0.9
 
 # AI / LLM (SDK unificado google-genai; google-generativeai esta en fin de vida)
-google-genai>=1.0.0
+google-genai>=2.23.0
 
 # RAG stack
 langchain>=0.2.0
