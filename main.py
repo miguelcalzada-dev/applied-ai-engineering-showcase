@@ -14,6 +14,27 @@ load_dotenv()
 from routers import chat, vision, rag, nlp, prompt_lab
 from services.gemini_service import model_name
 
+def _proc_status_mb(key: str):
+    """Lee un valor de /proc/self/status en MB (Linux). None si no esta disponible."""
+    try:
+        with open("/proc/self/status", "r", encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith(key):
+                    return round(int(line.split()[1]) / 1024, 1)
+    except OSError:
+        pass
+    return None
+
+
+def _rss_mb():
+    """Memoria residente actual del proceso, en MB."""
+    return _proc_status_mb("VmRSS:")
+
+
+def _peak_rss_mb():
+    """Pico historico de memoria residente del proceso, en MB."""
+    return _proc_status_mb("VmHWM:")
+
 app = FastAPI(
     title="AI Lab",
     description=(
@@ -106,4 +127,6 @@ async def health_check():
         "status": "ok",
         "api_key_configured": bool(os.getenv("GEMINI_API_KEY", "")),
         "model": model_name(),
+        "rss_mb": _rss_mb(),
+        "peak_rss_mb": _peak_rss_mb(),
     }
