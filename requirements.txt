@@ -2,7 +2,7 @@
 fastapi>=0.110.0,<1.0.0
 uvicorn[standard]>=0.27.0,<1.0.0
 gunicorn>=21.2.0,<27.0.0
-python-multipart>=0.0.9,<1.0.0
+python-multipart>=0.0.32,<1.0.0
 
 # AI / LLM (SDK unificado google-genai; google-generativeai esta en fin de vida)
 google-genai>=1.0.0,<3.0.0
