@@ -1,0 +1,6 @@
+# Nixpacks ignoraba el Procfile y arrancaba gunicorn con un worker por CPU
+# (en Railway: 4), multiplicando el consumo de RAM x4. Aqui se fija 1 worker.
+# El estado (sesiones de chat y RAG) vive en memoria, por lo que 1 worker
+# tambien evita que las sesiones se pierdan entre workers.
+[start]
+cmd = "gunicorn main:app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8080 --timeout 120"
