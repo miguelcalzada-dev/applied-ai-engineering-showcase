@@ -18,7 +18,6 @@ Aplicación web interactiva que reúne los casos de uso de IA más demandados en
 - [Stack tecnológico](#stack-tecnológico)
 - [Arquitectura](#arquitectura)
 - [Puesta en marcha](#puesta-en-marcha)
-- [Docker](#docker)
 - [Variables de entorno](#variables-de-entorno)
 - [API](#api)
 - [Estructura](#estructura)
@@ -44,7 +43,7 @@ Aplicación web interactiva que reúne los casos de uso de IA más demandados en
 | IA / LLM | Google Gemini (`gemini-2.5-flash-lite` por defecto) vía SDK `google-genai` |
 | RAG | LangChain · ChromaDB · embeddings de Google |
 | Frontend | SPA en Vanilla JavaScript y CSS (glassmorphism, dark mode) |
-| Contenedores | Docker (multi-stage de dependencias) |
+| Despliegue | Railway (Nixpacks + Procfile) |
 | Observabilidad | Endpoint `/health`, rate limiting por IP, logging a stderr |
 
 ## Arquitectura
@@ -91,13 +90,6 @@ uvicorn main:app --reload
 
 Consigue una API key gratuita en [Google AI Studio](https://aistudio.google.com/apikey).
 
-## Docker
-
-```bash
-docker build -t ai-lab .
-docker run --rm -p 8000:8000 --env-file .env ai-lab
-```
-
 ## Variables de entorno
 
 Todas están documentadas en [`.env.example`](./.env.example).
@@ -140,7 +132,7 @@ services/
   rag_service.py        # Indexado y consulta RAG (LangChain + ChromaDB)
 static/                 # SPA (HTML, CSS y JS)
 data/                   # Documento de demo para el RAG
-Dockerfile · Procfile   # Opciones de despliegue
+Procfile                # Comando de arranque (Railway)
 ```
 
 ## Autor
