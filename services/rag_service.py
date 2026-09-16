@@ -91,9 +91,14 @@ def query_store(session_id: str, question: str, k: int = 4) -> str:
         KeyError: Si el session_id no existe.
     """
     if session_id not in _stores:
-        raise KeyError(
-            "Sesión no encontrada. Sube un documento primero o usa el documento de demo."
-        )
+        # El documento de demo es estatico: se reconstruye en el worker que atienda
+        # la peticion (con varios workers de gunicorn cada uno tiene su propia memoria).
+        if session_id == "__demo__":
+            get_demo_session()
+        else:
+            raise KeyError(
+                "Sesión no encontrada. Sube un documento primero o usa el documento de demo."
+            )
     vectordb = _stores[session_id]
     docs = vectordb.similarity_search(question, k=k)
     context = "\n\n---\n\n".join([d.page_content for d in docs])
