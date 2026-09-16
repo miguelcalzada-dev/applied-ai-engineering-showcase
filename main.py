@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+from collections import defaultdict, deque
 
 # Logs de diagnóstico para Render
 print(">>> [STARTUP] Iniciando Applied AI Engineering Showcase...", file=sys.stderr)
@@ -7,7 +9,7 @@ sys.stderr.flush()
 
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
@@ -30,10 +32,19 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS para desarrollo local y despliegue
+# CORS: solo el dominio propio (y local para desarrollo).
+ALLOWED_ORIGINS = [
+    "https://miguelcalzada.com",
+    "https://www.miguelcalzada.com",
+    "https://miguelcalzada.es",
+    "https://www.miguelcalzada.es",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -59,6 +70,33 @@ async def redirect_legacy_root(request: Request, call_next):
     """
     if request.scope.get("raw_path") in (b"/", b""):
         return RedirectResponse("https://miguelcalzada.com/ai-lab", status_code=308)
+    return await call_next(request)
+
+
+# Rate limiting basico en memoria para la API (protege la cuota de Gemini).
+# Suficiente con 1 worker; con varias instancias haria falta un store compartido.
+_RATE_LIMIT = 40      # peticiones
+_RATE_WINDOW = 60     # por ventana de segundos
+_rate_hits: dict = defaultdict(deque)
+
+
+@app.middleware("http")
+async def rate_limit_api(request: Request, call_next):
+    if "/api/" in request.scope.get("path", ""):
+        forwarded = request.headers.get("x-forwarded-for", "")
+        ip = forwarded.split(",")[0].strip() or (
+            request.client.host if request.client else "unknown"
+        )
+        now = time.time()
+        hits = _rate_hits[ip]
+        while hits and now - hits[0] > _RATE_WINDOW:
+            hits.popleft()
+        if len(hits) >= _RATE_LIMIT:
+            return JSONResponse(
+                {"detail": "Demasiadas peticiones. Espera un momento e inténtalo de nuevo."},
+                status_code=429,
+            )
+        hits.append(now)
     return await call_next(request)
 
 

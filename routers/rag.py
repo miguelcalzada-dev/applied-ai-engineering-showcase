@@ -63,13 +63,13 @@ async def use_demo():
     """
     try:
         session_id = get_demo_session()
-    except Exception as e:
+    except Exception:
         import traceback
         import sys
         traceback.print_exc(file=sys.stderr)
         raise HTTPException(
             status_code=500,
-            detail=f"Error al cargar el documento de demo: {e}",
+            detail="No se pudo cargar el documento de demo. Inténtalo de nuevo más tarde.",
         )
     return {
         "session_id": session_id,
