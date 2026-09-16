@@ -1,0 +1,7 @@
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+# Reglas conservadoras: solo errores reales (sintaxis, nombres indefinidos...).
+select = ["E9", "F63", "F7", "F82"]
