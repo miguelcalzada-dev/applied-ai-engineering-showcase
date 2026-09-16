@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import uuid
 from collections import defaultdict, deque
 
 from fastapi import FastAPI, Request
@@ -13,6 +14,21 @@ load_dotenv()
 
 from routers import chat, vision, rag, nlp, prompt_lab
 from services.gemini_service import model_name
+
+# Identidad del proceso: permite ver cuantas instancias/replicas hay detras.
+_INSTANCE_ID = uuid.uuid4().hex[:8]
+_STARTED_AT = time.time()
+
+
+def _cmdline():
+    """Linea de comandos con la que se arranco el proceso (Linux)."""
+    try:
+        with open("/proc/self/cmdline", "rb") as fh:
+            return " ".join(
+                part.decode("utf-8", "replace") for part in fh.read().split(b"\x00") if part
+            )
+    except OSError:
+        return None
 
 def _proc_status_mb(key: str):
     """Lee un valor de /proc/self/status en MB (Linux). None si no esta disponible."""
@@ -129,4 +145,7 @@ async def health_check():
         "model": model_name(),
         "rss_mb": _rss_mb(),
         "peak_rss_mb": _peak_rss_mb(),
+        "instance": _INSTANCE_ID,
+        "uptime_s": round(time.time() - _STARTED_AT),
+        "cmdline": _cmdline(),
     }
