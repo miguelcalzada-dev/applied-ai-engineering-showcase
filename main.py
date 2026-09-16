@@ -3,10 +3,6 @@ import sys
 import time
 from collections import defaultdict, deque
 
-# Logs de diagnóstico para Render
-print(">>> [STARTUP] Iniciando Applied AI Engineering Showcase...", file=sys.stderr)
-sys.stderr.flush()
-
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
@@ -14,19 +10,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 load_dotenv()
-print(f">>> [STARTUP] Python versión: {sys.version}", file=sys.stderr)
-print(f">>> [STARTUP] Directorio actual: {os.getcwd()}", file=sys.stderr)
-sys.stderr.flush()
 
 from routers import chat, vision, rag, nlp, prompt_lab
+from services.gemini_service import model_name
 
 app = FastAPI(
     title="AI Lab",
     description=(
-        "Demo interactiva de capacidades de IA: Chat multi-turno, Visión por Computador, "
+        "Demo interactiva de capacidades de IA: Chat multi-turno, Vision por Computador, "
         "RAG con documentos propios, Laboratorio de Prompts, Herramientas NLP y Asistente de Voz."
     ),
-    version="1.0.0",
+    version="1.1.0",
     root_path="/ai-lab",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -57,16 +51,16 @@ app.include_router(rag.router)
 app.include_router(nlp.router)
 app.include_router(prompt_lab.router)
 
-# Archivos estáticos (frontend)
+# Archivos estaticos (frontend)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.middleware("http")
 async def redirect_legacy_root(request: Request, call_next):
     """
-    La raíz de la URL antigua (Railway) redirige al dominio nuevo.
+    La raiz de la URL antigua (Railway) redirige al dominio nuevo.
     Se usa raw_path (no reescrito) para NO afectar a las peticiones que llegan
-    desde el portal a /ai-lab/... y evitar bucles de redirección.
+    desde el portal a /ai-lab/... y evitar bucles de redireccion.
     """
     if request.scope.get("raw_path") in (b"/", b""):
         return RedirectResponse("https://miguelcalzada.com/ai-lab", status_code=308)
@@ -75,8 +69,8 @@ async def redirect_legacy_root(request: Request, call_next):
 
 # Rate limiting basico en memoria para la API (protege la cuota de Gemini).
 # Suficiente con 1 worker; con varias instancias haria falta un store compartido.
-_RATE_LIMIT = 40      # peticiones
-_RATE_WINDOW = 60     # por ventana de segundos
+_RATE_LIMIT = int(os.getenv("RATE_LIMIT_MAX", "40"))          # peticiones
+_RATE_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))  # por ventana de segundos
 _rate_hits: dict = defaultdict(deque)
 
 
@@ -93,7 +87,7 @@ async def rate_limit_api(request: Request, call_next):
             hits.popleft()
         if len(hits) >= _RATE_LIMIT:
             return JSONResponse(
-                {"detail": "Demasiadas peticiones. Espera un momento e inténtalo de nuevo."},
+                {"detail": "Demasiadas peticiones. Espera un momento e intentalo de nuevo."},
                 status_code=429,
             )
         hits.append(now)
@@ -108,9 +102,8 @@ async def serve_home():
 @app.get("/health", tags=["System"])
 async def health_check():
     """Endpoint de salud para Railway/Render y monitores."""
-    api_key_set = bool(os.getenv("GEMINI_API_KEY", ""))
     return {
         "status": "ok",
-        "api_key_configured": api_key_set,
-        "model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+        "api_key_configured": bool(os.getenv("GEMINI_API_KEY", "")),
+        "model": model_name(),
     }
